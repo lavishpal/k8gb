@@ -464,7 +464,7 @@ deploy-k8gb-with-helm:
 	$(call setup-dns-provider-secrets,$(CLUSTER_ID))
 	helm repo add --force-update k8gb https://www.k8gb.io
 	cd chart/k8gb && helm dependency update
-	helm -n k8gb upgrade -i k8gb $(CHART) --version=${VERSION} \
+	helm -n k8gb upgrade -i k8gb $(CHART) $(call get-helm-version-arg,$(CHART),$(VERSION)) \
 		-f $(call get-helm-values-file,$(CHART)) \
 		-f $(VALUES_YAML) \
 		$(call get-helm-args,$(CLUSTER_ID)) \
@@ -878,6 +878,10 @@ endef
 
 define get-helm-values-file
 $(if $(filter k8gb/k8gb,$(1)),./deploy/helm/stable.yaml,./deploy/helm/next.yaml)
+endef
+
+define get-helm-version-arg
+$(if $(and $(filter k8gb/k8gb,$(1)),$(filter v0.0.0,$(2))),,--version=$(2))
 endef
 
 # values here are only available in the not released (next) version.
